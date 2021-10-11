@@ -161,10 +161,12 @@ public class ThreadPoolExecutor extends java.util.concurrent.ThreadPoolExecutor 
         submittedCount.incrementAndGet();
         try {
             super.execute(command);
+            // 发生拒绝策略 捕捉异常
         } catch (RejectedExecutionException rx) {
             if (super.getQueue() instanceof TaskQueue) {
                 final TaskQueue queue = (TaskQueue)super.getQueue();
                 try {
+                    // 尝试处理任务
                     if (!queue.force(command, timeout, unit)) {
                         submittedCount.decrementAndGet();
                         throw new RejectedExecutionException("Queue capacity is full.");

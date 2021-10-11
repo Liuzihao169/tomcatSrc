@@ -116,8 +116,13 @@ public class StandardThreadExecutor extends LifecycleMBeanBase
     @Override
     protected void startInternal() throws LifecycleException {
 
+        // 定制队列
         taskqueue = new TaskQueue(maxQueueSize);
+
+        // 定制线程工厂
         TaskThreadFactory tf = new TaskThreadFactory(namePrefix,daemon,getThreadPriority());
+
+        // 定制线程池
         executor = new ThreadPoolExecutor(getMinSpareThreads(), getMaxThreads(), maxIdleTime, TimeUnit.MILLISECONDS,taskqueue, tf);
         executor.setThreadRenewalDelay(threadRenewalDelay);
         if (prestartminSpareThreads) {

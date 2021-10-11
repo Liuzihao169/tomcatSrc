@@ -68,7 +68,9 @@ public class StandardService extends LifecycleMBeanBase implements Service {
         StringManager.getManager(Constants.Package);
 
     /**
-     * The <code>Server</code> that owns this Service, if any.
+     *
+     * 这是service 实例
+     *
      */
     private Server server = null;
 
@@ -79,7 +81,8 @@ public class StandardService extends LifecycleMBeanBase implements Service {
 
 
     /**
-     * The set of Connectors associated with this Service.
+     *
+     * 连接器
      */
     protected Connector connectors[] = new Connector[0];
     private final Object connectorsLock = new Object();
@@ -89,6 +92,10 @@ public class StandardService extends LifecycleMBeanBase implements Service {
      */
     protected final ArrayList<Executor> executors = new ArrayList<>();
 
+    /**
+     * engine容器
+     *
+     */
     private Engine engine = null;
 
     private ClassLoader parentClassLoader = null;
@@ -414,9 +421,12 @@ public class StandardService extends LifecycleMBeanBase implements Service {
 
         if(log.isInfoEnabled())
             log.info(sm.getString("standardService.start.name", this.name));
+
+        // 1、触发启动监听器
         setState(LifecycleState.STARTING);
 
         // Start our defined Container first
+        //  2、启动引擎
         if (engine != null) {
             synchronized (engine) {
                 engine.start();
@@ -429,9 +439,13 @@ public class StandardService extends LifecycleMBeanBase implements Service {
             }
         }
 
+
+        // 3、mapper监听器 热加载部署
         mapperListener.start();
 
         // Start our defined Connectors second
+
+        // 4、连接器的启动
         synchronized (connectorsLock) {
             for (Connector connector: connectors) {
                 try {
