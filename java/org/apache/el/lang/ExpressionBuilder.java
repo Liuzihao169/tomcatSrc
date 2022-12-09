@@ -268,6 +268,11 @@ public final class ExpressionBuilder implements NodeVisitor {
      * we don't want the EL implementation to depend on the JAR where that
      * class resides.
      */
+
+    /**
+     * 对象池 使用数组来 完成对象池技术
+     * @param <T>
+     */
     private static class SynchronizedStack<T> {
 
         public static final int DEFAULT_SIZE = 128;
@@ -295,6 +300,7 @@ public final class ExpressionBuilder implements NodeVisitor {
         }
 
 
+        // 使用同步方法
         public synchronized boolean push(T obj) {
             index++;
             if (index == size) {
@@ -320,7 +326,9 @@ public final class ExpressionBuilder implements NodeVisitor {
         }
 
         private void expand() {
+
             int newSize = size * 2;
+            // 不能超出最大值
             if (limit != -1 && newSize > limit) {
                 newSize = limit;
             }

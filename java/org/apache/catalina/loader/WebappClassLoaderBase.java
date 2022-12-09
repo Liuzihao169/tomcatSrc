@@ -808,6 +808,8 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
                         new PrivilegedFindClassByName(name);
                     clazz = AccessController.doPrivileged(dp);
                 } else {
+
+                    // 在web应用下查找类
                     clazz = findClassInternal(name);
                 }
             } catch(AccessControlException ace) {
@@ -821,6 +823,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
             }
             if ((clazz == null) && hasExternalRepositories) {
                 try {
+                    // 没有找到，那就父类进行查找
                     clazz = super.findClass(name);
                 } catch(AccessControlException ace) {
                     log.warn("WebappClassLoader.findClassInternal(" + name
@@ -832,6 +835,8 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
                     throw e;
                 }
             }
+
+            // 父类没有找到那就classnotfund异常
             if (clazz == null) {
                 if (log.isDebugEnabled())
                     log.debug("    --> Returning ClassNotFoundException");
@@ -1158,6 +1163,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
             checkStateForClassLoading(name);
 
             // (0) Check our previously loaded local class cache
+            // 检查本地是否已经加载过这个类在缓存当中
             clazz = findLoadedClass0(name);
             if (clazz != null) {
                 if (log.isDebugEnabled())
@@ -1168,6 +1174,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
             }
 
             // (0.1) Check our previously loaded class cache
+            // 检查系统类加载器中的cache是否加载过
             clazz = findLoadedClass(name);
             if (clazz != null) {
                 if (log.isDebugEnabled())
@@ -1182,6 +1189,8 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
             //       SRV.10.7.2
             String resourceName = binaryNameToPath(name, false);
 
+
+            // 尝试使用 java的ext加载器加载，防止web应用破坏重新java核心类
             ClassLoader javaseLoader = getJavaseClassLoader();
             boolean tryLoadingFromJavaseLoader;
             try {
@@ -1251,6 +1260,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
             if (log.isDebugEnabled())
                 log.debug("  Searching local repositories");
             try {
+                // 尝试在本地class尝试加载
                 clazz = findClass(name);
                 if (clazz != null) {
                     if (log.isDebugEnabled())
@@ -1264,6 +1274,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
             }
 
             // (3) Delegate to parent unconditionally
+            // 使用系统类加载器加载
             if (!delegateLoad) {
                 if (log.isDebugEnabled())
                     log.debug("  Delegating to parent classloader at end: " + parent);
